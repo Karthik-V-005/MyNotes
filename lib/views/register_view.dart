@@ -1,6 +1,10 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'dart:developer' as devtools show log;
+//import 'dart:developer' as devtools show log;
+import 'package:mynotes/utilities/show_error_dialog.dart';
+
 
 import 'package:mynotes/constants/routes.dart';
 
@@ -63,20 +67,17 @@ class _RegisterViewState extends State<RegisterView> {
               onPressed: () async {
                 final email = _email.text;
                 final password = _password.text;
-                
                 try {
-                  final userCredential =
                   await FirebaseAuth.instance.createUserWithEmailAndPassword(email: email
                   , password: password
                 );
-                devtools.log(userCredential.toString());
                 } on FirebaseAuthException catch (e) {
                   if(e.code == 'weak-password'){
-                    devtools.log("Weak password");
+                    await showErrorDialog(context, "Weak Password. Please enter a stronger password");
                   } else if (e.code == 'email-already-in-use'){
-                    devtools.log("Email already in use");
+                    await showErrorDialog(context, "Email is already in use");
                   } else if (e.code == 'invalid-email'){
-                    devtools.log("Invalid Email");
+                    await showErrorDialog(context, "Invalid E-Mail. Please provide a valid E-mail");
                   }
                 }
               },
