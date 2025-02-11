@@ -81,6 +81,8 @@ class _RegisterViewState extends State<RegisterView> {
                     await showErrorDialog(context, "Email is already in use");
                   } else if (e.code == 'invalid-email'){
                     await showErrorDialog(context, "Invalid E-Mail. Please provide a valid E-mail");
+                  } else {
+                    await showErrorDialog(context, '$e');
                   }
                 } catch (e) {
                   await showErrorDialog(context, e.toString());
