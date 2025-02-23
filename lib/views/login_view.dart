@@ -77,8 +77,10 @@ class _LoginViewState extends State<LoginView> {
                 } else {
                   Navigator.of(context).pushNamedAndRemoveUntil(verifyEmailRoute, (route) => false);
                 }
-                } on InvalidCredentialsException {
-                  await showErrorDialog(context, "Invalid Credentials",);
+                } on UserNotFoundAuthException {
+                  await showErrorDialog(context, "User not found",);
+                } on WrongPasswordAuthException {
+                  await showErrorDialog(context, "Wrong Password");
                 } on GenericException {
                   await showErrorDialog(context, "Authentication Error",);
                 } 
