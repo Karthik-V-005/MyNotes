@@ -31,9 +31,6 @@ class NotesService {
     } catch (e) {
       rethrow;
     }
-    
-    
-
   }
 
   Future<void> _cachedNotes() async {
@@ -89,6 +86,7 @@ class NotesService {
     } else {
       final note = DatabaseNote.fromRow(notes.first);
       _notes.removeWhere((note) => note.id == id);
+      _notes.add(note);
       _notesStreamController.add(_notes);
       return note;
     }
@@ -121,10 +119,13 @@ class NotesService {
   }
 
   Future<DatabaseNote> createNote({required DatabaseUser owner}) async {
+
     await _ensureDbIsOpen();
     final db = _getDatabaseOrThrow();
 
-    //make sure owner exists in the database with the coreect id
+    //make sure owner exists in the database with the correct id
+
+    
 
     final dbUser = await getUser(email: owner.email);
     if (dbUser != owner) {
@@ -156,13 +157,16 @@ class NotesService {
   Future<DatabaseUser> getUser({required String email}) async {
     await _ensureDbIsOpen();
     final db = _getDatabaseOrThrow();
+
+    
+
     final results = await db.query(
       userTable,
       limit: 1,
       where: 'email = ?',
       whereArgs: [email.toLowerCase()],
     );
-
+    
     if (results.isEmpty) {
       throw CouldNotFindUser();
     } else {
@@ -178,14 +182,14 @@ class NotesService {
       limit: 1,
       where: 'email = ?',
       whereArgs: [email.toLowerCase()],
-    );
+    );    
 
     if (results.isNotEmpty) {
       throw UserAlreadyExists();
     }
 
     final userId = await db.insert(userTable, {
-      emailColumn: emailColumn.toLowerCase(),
+      emailColumn: email.toLowerCase(),
     });
 
     return DatabaseUser(
@@ -235,7 +239,7 @@ class NotesService {
     }
   }
 
-  Future<void> open() async {
+  Future<void> open() async { 
     if (_db != null) {
       throw DatabaseAlreadyOpenedException();
     }
@@ -314,7 +318,7 @@ const noteTable = 'note';
 const idColumn = 'id';
 const emailColumn = 'email';
 const userIdColumn = 'user_id';
-const textColumn = 'note';
+const textColumn = 'text';
 const isSyncedWithCloudColumn = 'is_synced_with_cloud';
 const createUserTable = '''CREATE TABLE IF NOT EXISTS "user" (
 	          "id"	INTEGER NOT NULL,
@@ -322,7 +326,7 @@ const createUserTable = '''CREATE TABLE IF NOT EXISTS "user" (
 	          PRIMARY KEY("id" AUTOINCREMENT)
             );
       ''';
-const createNoteTable = '''CREATE TABLE "note" (
+const createNoteTable = '''CREATE TABLE IF NOT EXISTS "note" (
             "id"	INTEGER NOT NULL,
             "user_id"	INTEGER NOT NULL,
             "text"	TEXT,
